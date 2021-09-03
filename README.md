@@ -1,2 +1,2 @@
 # Parkinson-s-disease-detection
-Zdravo kristinka ovo je test :D
+Zdravo Kristinka, nadam se da ces ovo da vidis, jer zelim da znas da si foka.
