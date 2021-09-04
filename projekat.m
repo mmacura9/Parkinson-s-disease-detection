@@ -18,7 +18,34 @@ r = k*rzi/sqrt(k+k*(k-1)*rii);
 
 %% Information Gain
 [M N] = size(val);
+data = round(data,2,'significant');
 p1 = sum(data(1:end,end))/M;
 p0 = 1 - p1;
 
-Info_D = - p0*log2(p0) - p1*log2(p1)
+Info_D = - p0*log2(p0) - p1*log2(p1);
+Info_DA(1:10) = zeros(1,10); 
+
+
+for i = 1:10
+    K = data(:,i); 
+    elemK = unique(K);
+    total_0 = sum(data(:,end)==0);
+    total_1 = sum(data(:,end)==1);
+    for j = 1:length(elemK) 
+        if sum(K==elemK(j) & data(:,end)==0)>0 
+            absD = length(K);
+            absDj = sum(K==elemK(j));
+            p1 = sum(K==elemK(j) & data(1:end,end)==1)/absDj;
+            p0 = 1 - p1;
+            if p1==1 || p1 ==0
+                InfoDj =0;
+            else
+                InfoDj = -p0*log2(p0)-p1*log2(p1);
+            end
+            Info_DA(i) = Info_DA(i) + absDj/absD*InfoDj;
+        end
+    end 
+end 
+
+IG = Info_D-Info_DA
+
