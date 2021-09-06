@@ -1,3 +1,4 @@
+%% Marko
 close all
 clear
 clc
@@ -9,6 +10,14 @@ matrix = split(t{1},',');
 var = str2double(matrix(2:end,2:end));
 data = var(:,[1,3,5,9,13,18,19,20,21,22, 17]);
 
+%% Kristina
+close all
+clear
+clc
+matrix = table2array(readtable('parkinsonsData.csv'));
+data = matrix(:,[1,3,5,9,13,18,19,20,21,22, 17]);
+
+%% Podela
 % holdout metoda (80% obucavanje, 20% testiranje)
 r = 5:5:length(data);
 data_test = data(r,:);
@@ -18,7 +27,15 @@ l = l(mod(l(:),4) ~= 0);
 
 data_trening = data(l,:);
 
-%LDA
+%% Balansiranje mozda kasnije
+X0 = data_trening(data_trening(:,end) == 0, 1:end-1); %36
+X1 = data_trening(data_trening(:,end) == 1, 1:end-1); %111
+
+X0 = data(data(:,end) == 0, 1:end-1); %48
+X1 = data(data(:,end) == 1, 1:end-1); %147
+
+
+%% LDA
 p0 = sum(data_trening(:,end)==0);
 p1 = sum(data_trening(:,end)==1);
 
@@ -49,7 +66,8 @@ J = sum(diag(S));
 D = real(D);
 D = diag(D);
 
-A = real([V(:,1) V(:,5)]);
+[~, ind] = sort(D, 'descend');
+A = real([V(:,ind(1)) V(:,ind(2))]);
 
 Y0 = A'*X0';
 Y1 = A'*X1';
@@ -59,8 +77,8 @@ figure(1)
     hold all
     plot(Y1(1,:),Y1(2,:),'c*')
     hold off
-%% 3 dimenzije
-% A = real([V(:,1) V(:,5) V(:,6)]);
+% %% 3 dimenzije
+% A = real([V(:,ind(1)) V(:,ind(2)) V(:,ind(3))]);
 % 
 % Y0 = A'*X0';
 % Y1 = A'*X1';
@@ -70,6 +88,12 @@ figure(1)
 %     hold all
 %     plot3(Y1(1,:),Y1(2,:),Y1(3,:),'c*')
 %     hold off
+
+%% testirajuci podaci
+X0t = data_test(data_test(:,end) == 0, 1:end-1);
+X1t = data_test(data_test(:,end) == 1, 1:end-1);
+Y0t = A'*X0t';
+Y1t = A'*X1t';
 
 %% kvadratni klasifikator za 2 dimenzije
 
@@ -97,9 +121,54 @@ figure(2)
     plot(Y0(1,:),Y0(2,:),'o')
     hold on
     plot(Y1(1,:),Y1(2,:),'c*')
-    fimplicit(f,[xlim ylim])
+    %fimplicit(f,[xlim ylim])
+    ezplot(f,[xlim ylim])
     hold off
 
+%% testiranje
+figure(3)
+    plot(Y0t(1,:),Y0t(2,:),'o')
+    hold on
+    plot(Y1t(1,:),Y1t(2,:),'c*')
+    %fimplicit(f,[xlim ylim])
+    ezplot(f,[xlim ylim])
+    hold off
+%% linearni klasifikator za 2 dimenzije
+
+U = zeros(3, length(data_trening));
+for i = 1:length(Y0)
+    U(:,i)=[-Y0(1,i) -Y0(2,i) -1]';
+end
+
+for i = 1:length(Y1)
+    U(:,i+length(Y0))=[Y1(1,i) Y1(2,i) 1]';
+end
+G = ones(length(data_trening),1);
+W = (U*U')^-1 *U*G;
+
+v1 = W(1);
+v2 = W(2);
+v0 = W(3);
+
+f = @(x1,x2) v1*x1 + v2*x2 + v0;
+
+figure(4)
+    plot(Y0(1,:),Y0(2,:),'o')
+    hold on
+    plot(Y1(1,:),Y1(2,:),'c*')
+    %fimplicit(f,[xlim ylim])
+    ezplot(f,[xlim ylim])
+    hold off
+    
+%% testiranje
+figure(5)
+    plot(Y0t(1,:),Y0t(2,:),'o')
+    hold on
+    plot(Y1t(1,:),Y1t(2,:),'c*')
+    %fimplicit(f,[xlim ylim])
+    ezplot(f,[xlim ylim])
+    hold off
+    
 %% KNN klasifikator
 
 X_test = data_test(:,1:end-1);
@@ -135,7 +204,7 @@ for y = Y_test
     end
 end
 
-figure(3)
+figure(6)
     plot(Y0(1,:),Y0(2,:),'o')
     hold on
     plot(Y1(1,:),Y1(2,:),'c*')

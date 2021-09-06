@@ -1,3 +1,4 @@
+%% Marko
 close all
 clear
 clc
@@ -8,6 +9,14 @@ fclose(f);
 matrix = split(t{1},',');
 var = str2double(matrix(2:end,2:end));
 data = var(:,[1,3,5,9,13,18,19,20,21,22, 17]);
+cor = corrcoef(data);
+
+%% Kristina
+close all
+clear
+clc
+matrix = table2array(readtable('parkinsonsData.csv'));
+data = matrix(:,[1,3,5,9,13,18,19,20,21,22,17]);
 cor = corrcoef(data);
 
 %% Correlation feature selection
