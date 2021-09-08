@@ -121,6 +121,8 @@ figure(1)
     plot(Y0(1,:),Y0(2,:),'o')
     hold all
     plot(Y1(1,:),Y1(2,:),'c*')
+    title('LDA redukcija na 2 dimenzije')
+    legend('zdravi', 'bolesni')
     hold off
 % %% 3 dimenzije
 % A = real([V(:,ind(1)) V(:,ind(2)) V(:,ind(3))]);
@@ -132,6 +134,8 @@ figure(1)
 %     plot3(Y0(1,:),Y0(2,:),Y0(3,:),'o')
 %     hold all
 %     plot3(Y1(1,:),Y1(2,:),Y1(3,:),'c*')
+%     title('LDA redukcija na 3 dimenzije')
+%     legend('zdravi', 'bolesni')
 %     hold off
 
 %% testirajuci podaci
