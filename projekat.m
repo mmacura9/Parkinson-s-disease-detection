@@ -11,13 +11,20 @@ var = str2double(matrix(2:end,2:end));
 data = var(:,[1,3,5,9,13,18,19,20,21,22, 17]);
 cor = corrcoef(data);
 
-%% Kristina
-close all
-clear
-clc
-matrix = table2array(readtable('parkinsonsData.csv'));
-data = matrix(:,[1,3,5,9,13,18,19,20,21,22,17]);
-cor = corrcoef(data);
+[M N] = size(data);
+
+for i = 1:N
+    data(:,i)= data(:,i)/max(data(:,i));
+end
+
+
+% %% Kristina
+% close all
+% clear
+% clc
+% matrix = table2array(readtable('parkinsonsData.csv'));
+% data = matrix(:,[1,3,5,9,13,18,19,20,21,22,17]);
+% cor = corrcoef(data);
 
 %% Correlation feature selection
 k=10;
@@ -26,8 +33,8 @@ rii = (sum(sum(cor(1:end-1,1:end-1)))-10)/10/9; %PROVERI
 r = k*rzi/sqrt(k+k*(k-1)*rii);
 
 %% Information Gain
-[M N] = size(var);
-data = round(data,3,'significant');
+data = round(data,3,'significant');% podeli sa max
+
 p1 = sum(data(1:end,end))/M;
 p0 = 1 - p1;
 

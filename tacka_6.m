@@ -11,13 +11,17 @@ var = str2double(matrix(2:end,2:end));
 data = var(:,[1,3,5,9,13,18,19,20,21,22, 17]);
 
 %% Kristina
-close all
-clear
-clc
-matrix = table2array(readtable('parkinsonsData.csv'));
-data = matrix(:,[1,3,5,9,13,18,19,20,21,22, 17]);
+% close all
+% clear
+% clc
+% matrix = table2array(readtable('parkinsonsData.csv'));
+% data = matrix(:,[1,3,5,9,13,18,19,20,21,22, 17]);
 
 %% Podela
+[M N] = size(data);
+for i = 1:N
+    data(:,i)= data(:,i)/max(data(:,i));
+end
 % holdout metoda (80% obucavanje, 20% testiranje)
 r = 4:4:length(data);
 data_test = data(r,:);
@@ -270,12 +274,12 @@ for y = Y_test
         end
     end
     if healthy<=infected
-        num_infected = num_infected+1
-        Y1_test(:,num_infected) = y
+        num_infected = num_infected+1;
+        Y1_test(:,num_infected) = y;
     end
     if healthy>infected
-        num_healthy = num_healthy+1
-        Y0_test(:,num_healthy) = y
+        num_healthy = num_healthy+1;
+        Y0_test(:,num_healthy) = y;
     end
 end
 
@@ -285,3 +289,4 @@ figure(6)
     plot(Y1(1,:),Y1(2,:),'c*')
     plot(Y0_test(1,:),Y0_test(2,:),'ro')
     plot(Y1_test(1,:),Y1_test(2,:),'g*')
+    title('KNN :(')
