@@ -19,7 +19,7 @@ data = matrix(:,[1,3,5,9,13,18,19,20,21,22, 17]);
 
 %% Podela
 % holdout metoda (80% obucavanje, 20% testiranje)
-r = 5:5:length(data);
+r = 4:4:length(data);
 data_test = data(r,:);
 
 l = 1:length(data);
@@ -27,13 +27,53 @@ l = l(mod(l(:),4) ~= 0);
 
 data_trening = data(l,:);
 
-%% Balansiranje mozda kasnije
-X0 = data_trening(data_trening(:,end) == 0, 1:end-1); %36
-X1 = data_trening(data_trening(:,end) == 1, 1:end-1); %111
+%% Nasumicna podela
+X1 = data(data(:,end) == 0, 1:end-1);
+X2 = data(data(:,end) == 1, 1:end-1);
 
-X0 = data(data(:,end) == 0, 1:end-1); %48
-X1 = data(data(:,end) == 1, 1:end-1); %147
+[m1,~] = size(X1);
+[m2,~] = size(X2);
 
+r = 0.7;
+% Obucavajuci i testirajuci za klasu 1
+tmp = randperm(m1);
+ind_ob = tmp(1:round(r*m1));
+X1_ob = X1(ind_ob,:);
+ind_t = tmp(round(r*m1)+1:end);
+X1_t = X1(ind_t,:);
+
+% Obucavajuci i testirajuci za klasu 2
+tmp = randperm(m2);
+ind_ob = tmp(1:round(r*m2));
+X2_ob = X2(ind_ob,:);
+ind_t = tmp(round(r*m2)+1:end);
+X2_t = X2(ind_t,:);
+
+%% Balansiranje
+
+diff_ob = size(X2_ob,1) - size(X1_ob,1);
+diff_t = size(X2_t,1) - size(X1_t,1);
+
+M_ob = mean(X1_ob, 1);
+S_ob = cov(X1_ob, 1);
+new_ob = mvnrnd(M_ob, S_ob, diff_ob);
+
+X1_ob = [X1_ob; new_ob];
+
+%% spajanje
+
+[dim1,~] = size(X1_ob);
+[dim2,~] = size(X2_ob);
+X_ob = [X1_ob; X2_ob];
+y_ob = [zeros(1,dim1) ones(1,dim2)]';
+
+[dim1,~] = size(X1_t);
+[dim2,~] = size(X2_t);
+X_t = [X1_t; X2_t];
+y_t = [zeros(1,dim1) ones(1,dim2)]';
+
+data_trening = [X_ob, y_ob(:,1)];
+data_test = [X_t, y_t(:,1)];
 
 %% LDA
 p0 = sum(data_trening(:,end)==0);
@@ -94,7 +134,6 @@ X0t = data_test(data_test(:,end) == 0, 1:end-1);
 X1t = data_test(data_test(:,end) == 1, 1:end-1);
 Y0t = A'*X0t';
 Y1t = A'*X1t';
-
 %% kvadratni klasifikator za 2 dimenzije
 
 U = zeros(6, length(data_trening));
@@ -106,6 +145,8 @@ for i = 1:length(Y1)
     U(:,i+length(Y0))=[Y1(1,i)^2 2*Y1(1,i)*Y1(2,i) Y1(2,i)^2 Y1(1,i) Y1(2,i) 1]';
 end
 G = ones(length(data_trening),1);
+%G(1:length(Y0)-1) = 0.7;
+%G(length(Y0):end) = 1;
 W = (U*U')^-1 *U*G;
 
 q11=W(1);
@@ -123,6 +164,8 @@ figure(2)
     plot(Y1(1,:),Y1(2,:),'c*')
     %fimplicit(f,[xlim ylim])
     ezplot(f,[xlim ylim])
+    title('Kvadratni klasifikator na bazi željenog izlaza')
+    legend('Zdravi','Bolesni')
     hold off
 
 %% testiranje
@@ -132,7 +175,21 @@ figure(3)
     plot(Y1t(1,:),Y1t(2,:),'c*')
     %fimplicit(f,[xlim ylim])
     ezplot(f,[xlim ylim])
+    title('Kvadratni klasifikator na bazi željenog izlaza - test')
+    legend('Zdravi','Bolesni')
     hold off
+    
+%% Konfuziona matrica
+% Testirajuci skup
+[~, dim1] = size(Y0t);
+[~, dim2] = size(Y1t);
+
+odluke = [f(Y0t(1,:),Y0t(2,:))>0, f(Y1t(1,:),Y1t(2,:))>0]*1.0;
+tacno = [zeros(1,dim1) ones(1,dim2)];
+figure()
+    plotconfusion(tacno,odluke);
+    title('Konfuziona matrica - kvadratni klasifikator');
+    xlabel('Tacna klasa'); ylabel('Estimirana klasa');
 %% linearni klasifikator za 2 dimenzije
 
 U = zeros(3, length(data_trening));
@@ -144,6 +201,9 @@ for i = 1:length(Y1)
     U(:,i+length(Y0))=[Y1(1,i) Y1(2,i) 1]';
 end
 G = ones(length(data_trening),1);
+%G(1:length(Y0)-1) = 0.7;
+%G(length(Y0):end) = 1;
+
 W = (U*U')^-1 *U*G;
 
 v1 = W(1);
@@ -158,6 +218,8 @@ figure(4)
     plot(Y1(1,:),Y1(2,:),'c*')
     %fimplicit(f,[xlim ylim])
     ezplot(f,[xlim ylim])
+    title('Linearni klasifikator na bazi željenog izlaza')
+    legend('Zdravi','Bolesni')
     hold off
     
 %% testiranje
@@ -167,8 +229,21 @@ figure(5)
     plot(Y1t(1,:),Y1t(2,:),'c*')
     %fimplicit(f,[xlim ylim])
     ezplot(f,[xlim ylim])
+    title('Kvadratni klasifikator na bazi željenog izlaza - test')
+    legend('Zdravi','Bolesni')
     hold off
     
+%% Konfuziona matrica
+% Testirajuci skup
+[~, dim1] = size(Y0t);
+[~, dim2] = size(Y1t);
+
+odluke = [f(Y0t(1,:),Y0t(2,:))>0, f(Y1t(1,:),Y1t(2,:))>0]*1.0;
+tacno = [zeros(1,dim1) ones(1,dim2)];
+figure()
+    plotconfusion(tacno,odluke);
+    title('Konfuziona matrica - linearni klasifikator');
+    xlabel('Tacna klasa'); ylabel('Estimirana klasa');
 %% KNN klasifikator
 
 X_test = data_test(:,1:end-1);
