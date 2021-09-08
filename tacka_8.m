@@ -19,6 +19,13 @@ matrix = table2array(readtable('parkinsonsData.csv'));
 data = matrix;
 X = data(:,[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,20,21,22,23]);
 y = data(:, 17);
+
+%% Normalizacija
+[M N] = size(data);
+for i = 1:N
+    data(:,i)= data(:,i)/max(data(:,i));
+end
+
 %% Podela obicna - deli 70/30 sve
 % pokreces ili ovo ili sledecu
 [N,~] = size(matrix);

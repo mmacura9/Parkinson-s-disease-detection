@@ -11,17 +11,18 @@ var = str2double(matrix(2:end,2:end));
 data = var(:,[1,3,5,9,13,18,19,20,21,22, 17]);
 
 %% Kristina
-% close all
-% clear
-% clc
-% matrix = table2array(readtable('parkinsonsData.csv'));
-% data = matrix(:,[1,3,5,9,13,18,19,20,21,22, 17]);
+close all
+clear
+clc
+matrix = table2array(readtable('parkinsonsData.csv'));
+data = matrix(:,[1,3,5,9,13,18,19,20,21,22, 17]);
 
-%% Podela
+%% Normalizacija
 [M N] = size(data);
 for i = 1:N
     data(:,i)= data(:,i)/max(data(:,i));
 end
+%% Podela
 % holdout metoda (80% obucavanje, 20% testiranje)
 r = 4:4:length(data);
 data_test = data(r,:);
